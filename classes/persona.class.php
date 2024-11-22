@@ -10,24 +10,24 @@ class persona{
     public $telefono;
     public $email;
     public $conexion;
-    public $validacion;
+    public $validaciones;
 
     /*CONEXIONES E INSTANCIAS */
     public function __construct(){
         $this->conexion = new DB();
-        $this->validacion = new Validaciones();
+        $this->validaciones = new Validaciones();
     }
 
     /*
     * GETTERS Y SETTERS
     */
     //GETTER Y SETTER DEL ATRIBUTO ID_PERSONA
-    public function setIdpersona($idpersona){
-        $this->idpersona =$idpersona;
+    public function setIdPersona($idpersona){
+        $this->idpersona = intval($idpersona);
     }
 
-    public function getIdpersona(){
-        return $this->idpersona;
+    public function getIdPersona($idpersona){
+        return = intval($this->idpersona);
     }
 
     //GETTER Y SETTER DEL ATRIBUTO NOMBRES
@@ -85,54 +85,74 @@ class persona{
 
     public function obtenerPersona(int $idpersona){
         if(idpersona > 0){
-            $resultado = $this->conexion->run('SELECT * FROM persona where id_persona='-$idpersona);
+            $resultado = $this->conexion->run('SELECT * FROM persona where id_persona='. $idpersona);
             $array = array("mensaje"=>"registros encontrados","valores"=>$resultado->fetch());
             return $array
         }else{
-            $array = array("mensaje"=>"no se puede ejecutar la consulta el parametro ID es incorrecto","valores"=>"");
+            $array = array("mensaje"=>"no se puede ejecutar la consulta, el parametro ID es incorrecto","valores"=>"");
         }
     }
 
     public function nuevapersona($nombres,$apellidos,$fnac,$telefono,$email){
         $bandera_validacion =0;
+        
         //validamos los nombres
-        if($this->validacion::verificar_fecha($fnac, "y-m-d")){
-            $thissetFNac($fnac)
+        if($this->validacion::verificar_solo_letras(trim($nombres),true)){
+            $this->setNombres($nombres);
         }else{
-            $bandera_validacion++;
+            $bandera_validaciones++;
         }
+        
         //validamos los apellidos
-        if($this->validacion::verificar_fecha($fnac, "y-m-d")){
-            $thissetFNac($fnac)
+        if($this->validacion::verificar_solo_letras(trim($apellidos),true)){
+            $this->setApellidos($apellidos);
         }else{
             $bandera_validacion++;
         }
+        
         //validamos la fecha de nacimiento
         if($this->validacion::verificar_fecha($fnac, "y-m-d")){
             $thissetFNac($fnac)
         }else{
             $bandera_validacion++;
         }
-        //validamos la fecha de nacimiento
-        if($this->validacion::verificar_fecha($fnac, "y-m-d")){
-            $thissetFNac($fnac)
+        
+        //validamos el telefono
+        if($this->validacion::validar_telefono(trim($telefono))){
+            $this->setTelefono($telefono);
         }else{
             $bandera_validacion++;
         }
-        //validamos la fecha de nacimiento
-        if($this->validacion::verificar_fecha($fnac, "y-m-d")){
-            $thissetFNac($fnac)
+        
+        //validamos el email
+        if($this->validacion::validar_email($email)){
+            $this->setEmail($email);
         }else{
             $bandera_validacion++;
         }
 
-        if(bandera_validacion === 0){
+        if($bandera_validacion === 0){
             $parametros = array(
                 "nom" => $this->getNombres(),
                 "ape" => $this->getApellidos(),
                 "fnac" => $this->getFNac(),
-                "nom" => $this->getEmail(),
-            )
+                "email" => $this->getEmail(),
+            );
+
+            $resultado = $this->conexion->run('INSERT INTO persona(nombres,apellidos,fnac,telefono,email) VALUES (:nom,:ape,:fnac,:tel,:email);' ,$parametros);
+            if($this->conexion->n > 0 and $this->conexion->id > 0){
+                
+                //SI SE INSERTARON LOS DATOS
+                $resultado = $this->obtenerPersona($this->conexion->id);
+                $array = array("mensaje"=>"se ha registrado la persona correctamente","valores"=>$resultado);
+                return $array;
+            }else{
+                $array = array("mensaje"=>"hubo un problema al registrar la persona","valores"=>"");
+                return $array;
+            }
+        }else{
+            $array = array("mensaje"=>"existe al menos un campo obligatorio que no se ha enviado","valores"=>"");
+                return $array;
         }
     }
 
