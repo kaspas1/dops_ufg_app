@@ -111,7 +111,7 @@ class persona{
         }
         
         //validamos la fecha de nacimiento
-        if($this->validacion::verificar_fecha($fnac, "y-m-d")){
+        if($this->validacion::verificar_fecha($fnac, "Y-m-d")){
             $thissetFNac($fnac)
         }else{
             $bandera_validacion++;
