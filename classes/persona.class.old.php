@@ -78,12 +78,6 @@ class Persona{
 		}
 	}
 
-	public function obtenerPersonas(){
-			$resultado = $this->conexion->run('SELECT id_persona,nombres,apellidos,DATE_FORMAT(fnac,"%d/%m/%Y") as fnac,telefono,email FROM persona;');
-			$array = array("mensaje"=>"Registros encontrados","data"=>$resultado->fetchAll());
-			return $array;
-	}
-
 	public function nuevaPersona($nombres,$apellidos,$fnac,$telefono,$email){
 		$bandera_validacion = 0;
 		if($this->validacion::verificar_solo_letras(trim($nombres),true)){
@@ -112,6 +106,7 @@ class Persona{
 			$bandera_validacion++;
 		}
 		
+		
 		if($bandera_validacion === 0){
 			$parametros = array(
 				"nom"=>$this->getNombres(),
@@ -134,7 +129,7 @@ class Persona{
 			}
 		}else{
 			//Al menos una validación no fue superada
-			$array = array("mensaje"=>"Un campo obligatorio no fue enviado, o el formato de los valores en los campos digitados no es correcto","valores"=>"");
+			$array = array("mensaje"=>"Un campo obligatorio no fue enviado","valores"=>"");
 			return $array;
 		}
 	}
